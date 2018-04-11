@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import application
-from flask import render_template
+from app.forms import LoginForm
+from flask import render_template, flash, redirect, url_for
 
 
 @application.route('/')
@@ -35,3 +36,12 @@ def index():
         }
     ]
     return render_template('index.html', title=title, user=user, posts=posts)
+
+
+@application.route('/login', methods = ['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        flash(u'Пользователь {} вошел с паролем {}'.format(form.username.data, form.password.data))
+        return redirect(url_for('index'))
+    return render_template('login.html', form=form, title='Sing In')
