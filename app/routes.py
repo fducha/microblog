@@ -42,6 +42,6 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        print(u'Вошел пользователь {} с паролем {}'.format(form.username.data, form.password.data))
+        flash(u'Вошел пользователь {} с паролем {}'.format(form.username.data, form.password.data))
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
