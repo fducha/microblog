@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from app import application
+from app.forms import LoginForm
 from flask import render_template
 
 
