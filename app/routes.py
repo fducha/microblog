@@ -74,6 +74,17 @@ def register():
     return render_template("register.html", title=u'Регистрация', form=form)
 
 
+@application.route('/user/<username>')
+@login_required
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = [
+        {'author': user, 'body': 'Test post #1'},
+        {'author': user, 'body': 'Test post #2'}
+    ]
+    return render_template("user.html", user=user, posts=posts)
+
+
 @application.route('/logout')
 def logout():
     logout_user()
