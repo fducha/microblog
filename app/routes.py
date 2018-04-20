@@ -4,7 +4,8 @@ from app.models import User
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, url_for, redirect, request
 from werkzeug.urls import url_parse
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from datetime import datetime
 
 
 @application.route('/')
@@ -85,7 +86,24 @@ def user(username):
     return render_template("user.html", user=user, posts=posts)
 
 
+@application.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        flash(u'Ваши данные сохранены')
+        return redirect(url_for('edit_profile'))
+    return render_template("edit_profile.html", title=u'Редактирование профиля',
+                           form=form)
+
+
 @application.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@application.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
