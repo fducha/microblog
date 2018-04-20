@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Привет {{ user.username }}</h1>
+    <h1>Привет {{ current_user.username }}</h1>
     <hr>
-    {% for post in posts %}
-        <p>{{ post.author.username }} говорит: {{ post.body }}</p>
-    {% endfor %}
+    {% if posts %}
+        {% for post in posts %}
+            <p>{{ post.author.username }} говорит: {{ post.body }}</p>
+        {% endfor %}
+    {% else %}
+        <p>У Вас пока нет постов</p>
+    {% endif %}
 {% endblock %}
