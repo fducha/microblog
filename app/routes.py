@@ -2,13 +2,14 @@
 from app import application
 from app.forms import LoginForm
 from flask import render_template, flash, redirect, url_for
+from flask_login import current_user, login_user, logout_user
+from app.models import User
 
 
 @application.route('/')
 @application.route('/index')
 def index():
     title = 'Привет всем!!!'
-    user = {'username': 'fducha Петров'}
     posts = [
         {
             'author': {'username': 'user One'},
@@ -35,13 +36,25 @@ def index():
             'body': 'This is the Sixth post'
         }
     ]
-    return render_template('index.html', title=title, user=user, posts=posts)
+    return render_template('index.html', title=title, posts=posts)
 
 
-@application.route('/login', methods = ['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        flash(u'Пользователь {} вошел с паролем {}'.format(form.username.data, form.password.data))
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash(u'Неправильное имя пользователя или пароль')
+            return redirect(url_for('login'))
+        login_user(user=user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('login.html', form=form, title='Sing In')
+
+
+@application.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
