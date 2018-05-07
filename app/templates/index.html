@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Привет {{ current_user.username }}</h1>
+    {% if current_user.is_anonymous %}
+        <h1>Привет ВСЕМ реябта в моем Microblog'е</h1>
+    {% else %}
+        <h1>Привет {{ current_user.username }} в моем Microblog'е</h1>
+    {% endif %}
     <hr>
     {% for post in posts %}
         <p>{{ post.author.username }} говорит: {{ post.body }}</p>

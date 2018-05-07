@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 from app import application, db
-from app.forms import LoginForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
 from werkzeug.urls import url_parse
-from app.forms import RegistrationForm
+from datetime import datetime
 
 
 @application.route('/')
 @application.route('/index')
-@login_required
 def index():
     title = 'Привет всем!!!'
     posts = [
@@ -42,7 +41,7 @@ def index():
     return render_template('index.html', title=title, posts=posts)
 
 
-@application.route('/login', methods = ['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -80,3 +79,36 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@application.route('/user/<username>')
+@login_required
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = [
+        {'author': user, 'body': 'Test post # One'},
+        {'author': user, 'body': 'Test post # Two'}
+    ]
+    return render_template('user.html', posts=posts, user=user)
+
+
+@application.route('/edit_profile', methods=['POST', 'GET'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.about_me = form.about_me.data
+        db.session.commit()
+        return redirect(url_for('user', username=current_user.username))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+    return render_template('edit_profile.html', form=form, title=u'Редактирование профиля')
+
+
+@application.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
